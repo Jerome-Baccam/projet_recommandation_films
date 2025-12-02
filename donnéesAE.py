@@ -223,6 +223,6 @@ colonnes = ["id_film", "id_genre", "poster_path", "poster_url"]
 for col in colonnes:
     df[col] = df[col].replace("", "Inconnu").fillna("Inconnu")
 
-df.to_csv("data_afcae_tmdb.csv", index=False)
+df.to_csv("films.csv", index=False)
 
 df.head()
