@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 
 *.tsv
-*.csv
+
 *.xlsx
 *.xls
 *.gz
