@@ -1,5 +1,5 @@
 def main():
-    print("Hello from projet-recommandation-films!")
+    print("Hello from dataanalyst-projet2!")
 
 
 if __name__ == "__main__":
