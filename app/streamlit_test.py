@@ -169,8 +169,6 @@ def display_film_detail(film_data):
         st.session_state.selected_film = None
         st.rerun()
     
-    st.markdown("---")
-    
     # Affichage du film
     col1, col2 = st.columns([1, 2])
     
@@ -232,7 +230,6 @@ def display_film_detail(film_data):
             st.info("Synopsis non disponible")
     
     st.markdown("---")
-    st.markdown("---")
     
     # RECOMMANDATIONS
     st.markdown("## Si vous avez aimé ce film, vous aimerez probablement :")
@@ -265,7 +262,6 @@ def display_film_detail(film_data):
                     st.rerun()
     else:
         st.warning("Aucune recommandation disponible pour ce film.")
-
 
 
 def page1():
@@ -449,7 +445,7 @@ def page1():
                         if pd.isna(poster_url) or poster_url == "Inconnu" :
                             st.image("http://via.placeholder.com/150", width=150)
                         else:  # On affiche l'affiche du film
-                            st.image(poster_url, width=150)
+                            poster = st.image(poster_url, width=150)
                         st.markdown(f"**{film['titre']}**", width=150, text_alignment="center") # Titre en gras
                         
                         # Ajout d'un bouton "Infos" pour chaque film
@@ -465,15 +461,15 @@ def page1():
 
 
 def page2():
-    st.write("Un petit test pour du multipage app")
-    st.image("https://media.makeameme.org/created/impressive-2y23ct.jpg", width=600)
+    st.title("Le Ciné en Délire")
+    st.image(logo_cine_en_delire, width=600)
 
 def page3():
-    st.write("Un autre petit test pour du multipage app")
-    st.image("https://i.pinimg.com/564x/56/b9/a9/56b9a962f481a4212bce3f82b151433d.jpg", width=600)
+    st.title("A&E Tracker par la Wild Comedy Show")
+    st.image(logo_WCS, width=600)
 
 pages = [
-        st.Page(page1, icon="📽️", title="Recherche A&E"),
+        st.Page(page1, icon="📽️", title="Recherche A&E", default=True),
         st.Page(page2, icon="🎭", title="Le ciné en délire"),
         st.Page(page3, icon="🤡", title="A&E tracker by WCS"),
     ]
@@ -483,12 +479,13 @@ current_page = st.navigation(pages=pages, position="hidden")
 
     # Setup du menu
 def menu ():
-    num_cols_menu = max(len(pages) + 1, 8)
-    columns_menu = st.columns(num_cols_menu, vertical_alignment="bottom")
-    columns_menu[0].write("**Menu**")
-    for col, page in zip(columns_menu[1:-1], pages):
-        col.page_link(page, icon=page.icon)
-
+    with st.container(height=90):
+        num_cols_menu = max(len(pages) + 1, 5)
+        columns_menu = st.columns(num_cols_menu, vertical_alignment="bottom")
+        columns_menu[0].markdown("**MENU**", width="stretch", text_alignment="center")
+        for col, page in zip(columns_menu[1:-1], pages):
+            col.page_link(page, icon=page.icon, width="stretch")
+            
 # On lance le menu puis la page
 menu()
 current_page.run()
