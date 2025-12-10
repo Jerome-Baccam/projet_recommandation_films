@@ -17,9 +17,9 @@ if css_path.exists():
 else:
     st.warning(f"CSS file not found at: {css_path}")
 
-# Logo WCS
+# Logo WCS & Ciné en Délire
 logo_WCS = Path(__file__).parent / "wcs.jpg"
-
+logo_cine_en_delire = Path(__file__).parent / "cine_en_delire.png"
 # On intègre  le fichier csv et on définit la liste des genres
 film_csv = pd.read_csv("films_final.csv")
 bdd = pd.DataFrame(film_csv)
@@ -493,16 +493,16 @@ st.markdown('<div class="app-footer">', unsafe_allow_html=True)
 footer_col1, footer_col2, footer_col3, footer_col4, footer_col5 = st.columns([1, 1, 3, 1, 1])
 
 with footer_col1:
-    st.write("")
-    
-with footer_col2:
-    if Path("cineendelire.png").exists():
-        st.image("cineendelire.png", width=150)
+    if logo_cine_en_delire.exists():
+        st.image(logo_cine_en_delire, width=200)
     else:
         st.markdown("<p style='text-align: right; margin: 0; font-size: 20px; color: #c62828; font-weight: bold;'>WCS</p>", unsafe_allow_html=True)
 
+with footer_col2:
+    st.write("")
+
 with footer_col3:
-    st.markdown("<p style='text-align: center; margin: 0; font-size: 17px; color: #555;'>Application créée par la  Wild Comedy Show  pour Le ciné en délire. Données issus de IMDB, TMDB et AFCAE.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; margin: 0; font-size: 17px; color: #555;'>Application créée par la  Wild Comedy Show  pour Le ciné en délire. Données issus de IMDB, TMDB et AFCAE.<br><br>L'abus de film d'A&E provoque des poussées d'intelligence et un gonflement des chevilles. A consommer avec modération.</p>", unsafe_allow_html=True)
 
 with footer_col4:
     st.write("")
