@@ -170,7 +170,7 @@ def display_film_detail(film_data):
         st.rerun()
     
     # Affichage du film
-    col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([2, 5])
     
     with col1:
         st.markdown("### Affiche")
@@ -434,6 +434,7 @@ def page1():
             
             # Pagination des films (5 par ligne)
             films_par_ligne = 5
+            
             for i in range(0, len(display_films), films_par_ligne):
                 ligne_films = display_films.iloc[i : i + films_par_ligne]
                 cols = st.columns(films_par_ligne)
@@ -443,13 +444,14 @@ def page1():
                         poster_url = film['poster_url']
                         # On affiche un placeholder si l'URL est invalide
                         if pd.isna(poster_url) or poster_url == "Inconnu" :
-                            st.image("http://via.placeholder.com/150", width=150)
+                            st.image("http://via.placeholder.com/150", width=250)
                         else:  # On affiche l'affiche du film
-                            poster = st.image(poster_url, width=150)
-                        st.markdown(f"**{film['titre']}**", width=150, text_alignment="center") # Titre en gras
+                            poster = st.image(poster_url, width=250)
+                        film_title = f"""<div class='film-title'><span>{film['titre']}</span></div>"""
+                        st.html(film_title) # Titre en gras
                         
                         # Ajout d'un bouton "Infos" pour chaque film
-                        if st.button("DETAILS", key=f"film_{idx}", width=150):
+                        if st.button("DETAILS", key=f"film_{idx}", width=250):
                             st.session_state.selected_film = film['titre']
                             st.rerun()
         
