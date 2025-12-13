@@ -98,9 +98,9 @@ def create_recommendation_model(df):
         
         # Pondération des features pour donner plus d'importance aux réalisateurs
         # Genres x3, Acteurs x2, Réalisateurs x5
-        genres_weighted = genres_matrix * 3
-        actors_weighted = actors_matrix * 2
-        directors_weighted = directors_matrix * 5
+        genres_weighted = genres_matrix * 1.75
+        actors_weighted = actors_matrix * 1.5
+        directors_weighted = directors_matrix * 2
         
         # fusionner les matrices pondérées 
         feature_matrix = np.hstack([genres_weighted, actors_weighted, directors_weighted])
