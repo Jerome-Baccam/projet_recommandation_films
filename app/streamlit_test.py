@@ -20,8 +20,9 @@ else:
 # Logo WCS & Ciné en Délire
 logo_WCS = Path(__file__).parent / "wcs.jpg"
 logo_cine_en_delire = Path(__file__).parent / "cine_en_delire.png"
+placeholder = Path(__file__).parent / "placeholder_wcs.png"
 # On intègre  le fichier csv et on définit la liste des genres
-film_csv = pd.read_csv("films_final.csv")
+film_csv = pd.read_csv("films_final_2.csv")
 bdd = pd.DataFrame(film_csv)
 
 # Conversion des colonnes de listes pour le système de recommandation
@@ -173,13 +174,15 @@ def display_film_detail(film_data):
     col1, col2 = st.columns([2, 5])
     
     with col1:
-        st.markdown("### Affiche")
+        
         if pd.notna(film_data['poster_url']) and film_data['poster_url'] != 'Inconnu':
             try:
                 st.image(film_data['poster_url'], use_container_width=True)
             except:
+                st.image(placeholder, use_container_width=True)
                 st.info("Affiche non disponible")
         else:
+            st.image(placeholder, use_container_width=True)
             st.info("Affiche non disponible")
     
     with col2:
@@ -245,8 +248,10 @@ def display_film_detail(film_data):
                     try:
                         st.image(row['poster_url'], use_container_width=True)
                     except:
+                        st.image(placeholder, use_container_width=True)
                         st.info("Affiche")
                 else:
+                    st.image(placeholder, use_container_width=True)
                     st.info("Affiche")
                 
                 # Titre
@@ -286,13 +291,13 @@ def page1():
     if st.session_state.reset_triggered:
         st.session_state.filtered_data = bdd.copy()
         st.session_state.page_number = 0
-        st.session_state["filter_keyword"] = ""
-        st.session_state["filter_note"] = "Any"
-        st.session_state["filter_actor"] = "Any"
-        st.session_state["filter_popularity"] = "Any"
-        st.session_state["filter_director"] = "Any"
-        st.session_state["filter_year_checkbox"] = False
-        st.session_state["filter_year"] = 2025
+        st.session_state["filtre_mot_clef"] = ""
+        st.session_state["filtre_note"] = "Tout"
+        st.session_state["filtre_acteur"] = "Tout"
+        st.session_state["filtre_popularite"] = "Tout"
+        st.session_state["filtre_real"] = "Tout"
+        st.session_state["filtre_annee_checkbox"] = False
+        st.session_state["filtre_annee"] = 2025
         for i in range(1, 20):
             genre_key = f"genre_{i}"
             st.session_state[genre_key] = False
@@ -322,7 +327,7 @@ def page1():
                 popularite = st.selectbox("Popularité", options=["Tout", "Basse", "Moyenne", "Haute"], key="filtre_popularite")
             with but_droit:
                 director = st.selectbox("Réalisateur", options=realisateur_list, key="filtre_real")
-                annee_checkbox = st.checkbox("Filtrer par Année", value=False, key="filtre_annee_checkbox")
+                annee_checkbox = st.checkbox("Filtrer par Année",  key="filtre_annee_checkbox")
                 année = st.number_input("Année", min_value=1900, max_value=2025, value=2025, step=1, key="filtre_annee")
 
             st.write("Genre")
@@ -406,6 +411,19 @@ def page1():
         total_pages = total_films // films_par_page
         if total_films % films_par_page != 0:
             total_pages += 1 # On ajoute une page supplémentaire pour les restants
+        # Boutons de navigation (prcédente sur col1/suivante sur col3) --> Je l'ai déplacé ici car casse l'UX sinon
+        def boutons_navigation(key): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons
+            if total_films > 0 :
+                col1, col2, col3 = st.columns([1, 8, 1])
+                with col1:
+                    if st.button("Page Précédente", key=key, disabled=(st.session_state.page_number == 0)): # Désactivé si on est à la première page
+                        st.session_state.page_number -= 1
+                        st.rerun() # On recharge la page pour mettre à jour le contenu
+                with col3: # J'ai pas voulu me faire chier pour la génération de la deuxième clef
+                    if st.button("Page Suivante",key=key*100, disabled=(st.session_state.page_number >= total_pages - 1)): # Désactivé si on est à la dernière page
+                        st.session_state.page_number += 1
+                        st.rerun() # On recharge la page pour mettre à jour le contenu
+                        
         if total_films == 0: # Si aucun film ne correspond aux critères
             st.write("Aucun film ne correspond à vos critères de recherche.")
         else:
@@ -419,17 +437,6 @@ def page1():
             if total_pages > 0:
                 st.write(f"Page {st.session_state.page_number + 1} sur {total_pages}")
 
-            # Boutons de navigation (prcédente sur col1/suivante sur col3)
-            def boutons_navigation(key): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons
-                col1, col2, col3 = st.columns([1, 8, 1])
-                with col1:
-                    if st.button("Page Précédente", key=key, disabled=(st.session_state.page_number == 0)): # Désactivé si on est à la première page
-                        st.session_state.page_number -= 1
-                        st.rerun() # On recharge la page pour mettre à jour le contenu
-                with col3: # J'ai pas voulu me faire chier pour la génération de la deuxième clef
-                    if st.button("Page Suivante",key=key*100, disabled=(st.session_state.page_number >= total_pages - 1)): # Désactivé si on est à la dernière page
-                        st.session_state.page_number += 1
-                        st.rerun() # On recharge la page pour mettre à jour le contenu
             boutons_navigation(1)
             
             # Pagination des films (5 par ligne)
@@ -444,7 +451,7 @@ def page1():
                         poster_url = film['poster_url']
                         # On affiche un placeholder si l'URL est invalide
                         if pd.isna(poster_url) or poster_url == "Inconnu" :
-                            st.image("http://via.placeholder.com/150", width=250)
+                            st.image(placeholder, width=250)
                         else:  # On affiche l'affiche du film
                             poster = st.image(poster_url, width=250)
                         film_title = f"""<div class='film-title'><span>{film['titre']}</span></div>"""
