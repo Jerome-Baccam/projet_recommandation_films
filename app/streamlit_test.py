@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MultiLabelBinarizer
 
+
 # On intègre un CSS personnalisé
 css_path = Path(__file__).parent / "streamlit.css"
 if css_path.exists():
@@ -446,7 +447,7 @@ def page1():
                             st.image("http://via.placeholder.com/150", width=150)
                         else:  # On affiche l'affiche du film
                             poster = st.image(poster_url, width=150)
-                        st.markdown(f"**{film['titre']}**", width=150, text_alignment="center") # Titre en gras
+                        st.markdown(f"**{film['titre']}**") # Titre en gras
                         
                         # Ajout d'un bouton "Infos" pour chaque film
                         if st.button("DETAILS", key=f"film_{idx}", width=150):
