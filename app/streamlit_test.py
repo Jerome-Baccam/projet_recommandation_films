@@ -7,7 +7,9 @@ import ast
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MultiLabelBinarizer
-
+from PIL import Image
+import requests
+from io import BytesIO
 
 # On intègre un CSS personnalisé
 css_path = Path(__file__).parent / "streamlit.css"
@@ -21,8 +23,9 @@ else:
 # Logo WCS & Ciné en Délire
 logo_WCS = Path(__file__).parent / "wcs.jpg"
 logo_cine_en_delire = Path(__file__).parent / "cine_en_delire.png"
+placeholder = Path(__file__).parent / "placeholder_wcs.png"
 # On intègre  le fichier csv et on définit la liste des genres
-film_csv = pd.read_csv("films_final.csv")
+film_csv = pd.read_csv("films_final_2.csv")
 bdd = pd.DataFrame(film_csv)
 
 # Conversion des colonnes de listes pour le système de recommandation
@@ -56,7 +59,12 @@ for directors_str in film_csv['directeurs'].dropna():
         all_unique_directors.add(director_list_parsed.strip())
 realisateur_list = ['Tout'] + sorted(list(all_unique_directors))
 
-
+#resizing des affiches de films pour qu'ils aient tous la même taille
+def poster_sizing(poster_link):
+    r = requests.get(poster_link)
+    poster_resized = Image.open(BytesIO(r.content))
+    poster_resized = poster_resized.resize((750, 1125)) # il faut que ce soit un multiple de 250/375 pour que ça s'affiche bien dans les colonnes streamlit
+    return poster_resized
 
 # SYSTÈME DE RECOMMANDATION KNN 
 
@@ -98,9 +106,9 @@ def create_recommendation_model(df):
         
         # Pondération des features pour donner plus d'importance aux réalisateurs
         # Genres x3, Acteurs x2, Réalisateurs x5
-        genres_weighted = genres_matrix * 3
-        actors_weighted = actors_matrix * 2
-        directors_weighted = directors_matrix * 5
+        genres_weighted = genres_matrix * 1.75
+        actors_weighted = actors_matrix * 1.5
+        directors_weighted = directors_matrix * 2
         
         # fusionner les matrices pondérées 
         feature_matrix = np.hstack([genres_weighted, actors_weighted, directors_weighted])
@@ -171,16 +179,18 @@ def display_film_detail(film_data):
         st.rerun()
     
     # Affichage du film
-    col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([2, 5])
     
     with col1:
-        st.markdown("### Affiche")
+        
         if pd.notna(film_data['poster_url']) and film_data['poster_url'] != 'Inconnu':
             try:
-                st.image(film_data['poster_url'], use_container_width=True)
+                st.image(poster_sizing(film_data['poster_url']), width='stretch')
             except:
+                st.image(placeholder, width='stretch')
                 st.info("Affiche non disponible")
         else:
+            st.image(placeholder, width='stretch')
             st.info("Affiche non disponible")
     
     with col2:
@@ -226,7 +236,7 @@ def display_film_detail(film_data):
         # Synopsis
         st.markdown("### Synopsis")
         if pd.notna(film_data['résumé']) and film_data['résumé'] != 'Non disponible':
-            st.write(film_data['résumé'])
+            st.write(f"""<div class='synopsis'><span>{film_data['résumé']}</span></div>""", unsafe_allow_html=True)
         else:
             st.info("Synopsis non disponible")
     
@@ -235,30 +245,29 @@ def display_film_detail(film_data):
     # RECOMMANDATIONS
     st.markdown("## Si vous avez aimé ce film, vous aimerez probablement :")
     
-    recommendations = get_recommendations(film_data['titre'], bdd, model_data, 5)
+    recommendations = get_recommendations(film_data['titre'], bdd, model_data, 6)
     
     if not recommendations.empty:
-        cols = st.columns(5)
+        cols = st.columns(6)
         for idx, (i, row) in enumerate(recommendations.iterrows()):
             with cols[idx]:
                 # Affiche
                 if pd.notna(row['poster_url']) and row['poster_url'] != 'Inconnu':
                     try:
-                        st.image(row['poster_url'], use_container_width=True)
+                        st.image(poster_sizing(row['poster_url']), width='stretch')
                     except:
+                        st.image(placeholder, width='stretch')
                         st.info("Affiche")
                 else:
-                    st.info("Affiche")
-                
-                # Titre
-                st.markdown(f"**{row['titre']}**")
+                    st.image(placeholder, width='stretch')
+                st.markdown(f"""<div class='film-title'><span>{row['titre']}</span</div>""", unsafe_allow_html=True)
                 
                 # Note
                 if pd.notna(row['votes']):
                     st.caption(f"{row['votes']:.1f}/10")
                 
                 # Bouton Infos pour voir ce film recommandé
-                if st.button("Infos", key=f"rec_{idx}", use_container_width=True):
+                if st.button("Infos", key=f"rec_{idx}", width='stretch'):
                     st.session_state.selected_film = row['titre']
                     st.rerun()
     else:
@@ -287,13 +296,13 @@ def page1():
     if st.session_state.reset_triggered:
         st.session_state.filtered_data = bdd.copy()
         st.session_state.page_number = 0
-        st.session_state["filter_keyword"] = ""
-        st.session_state["filter_note"] = "Any"
-        st.session_state["filter_actor"] = "Any"
-        st.session_state["filter_popularity"] = "Any"
-        st.session_state["filter_director"] = "Any"
-        st.session_state["filter_year_checkbox"] = False
-        st.session_state["filter_year"] = 2025
+        st.session_state["filtre_mot_clef"] = ""
+        st.session_state["filtre_note"] = "Tout"
+        st.session_state["filtre_acteur"] = "Tout"
+        st.session_state["filtre_popularite"] = "Tout"
+        st.session_state["filtre_real"] = "Tout"
+        st.session_state["filtre_annee_checkbox"] = False
+        st.session_state["filtre_annee"] = 2025
         for i in range(1, 20):
             genre_key = f"genre_{i}"
             st.session_state[genre_key] = False
@@ -306,7 +315,7 @@ def page1():
     with lay_centre:
         # box stylisée pour le titre et les filtres
         st.markdown('<div class="main-box">', unsafe_allow_html=True)
-        st.markdown('<h1 class="main-title">Recherche de films A&E</h1>', unsafe_allow_html=True)
+        st.markdown("<h1 class='main-title'>Recherche de films d'Art & Essai</h1>", unsafe_allow_html=True)
 
         # Filtres container (dans la box stylisée)
         with st.container(border=True):
@@ -317,47 +326,34 @@ def page1():
             but_gauche, but_centre, but_droit = st.columns(3)
             with but_gauche:
                 mot_clef = st.text_input("Mot-clef", key="filtre_mot_clef")
+                st.write("<br>", unsafe_allow_html=True)
                 note = st.selectbox("Note", options=["Tout", ">= 5", ">= 7", ">= 9"], key="filtre_note")
             with but_centre:
                 actor = st.selectbox("Acteur", options=acteur_list, key="filtre_acteur")
+                st.write("<br> ", unsafe_allow_html=True)
                 popularite = st.selectbox("Popularité", options=["Tout", "Basse", "Moyenne", "Haute"], key="filtre_popularite")
             with but_droit:
                 director = st.selectbox("Réalisateur", options=realisateur_list, key="filtre_real")
-                annee_checkbox = st.checkbox("Filtrer par Année", value=False, key="filtre_annee_checkbox")
+                st.write("<br> ", unsafe_allow_html=True)
                 année = st.number_input("Année", min_value=1900, max_value=2025, value=2025, step=1, key="filtre_annee")
+                annee_checkbox = st.checkbox("Filtrer par Année",  key="filtre_annee_checkbox")
 
-            st.write("Genre")
+            st.write("Genres")
             # Genres comme toggle button dans des petites colonnes
-            # J'aurais pu faire une boucle mais j'ai préféré faire à la main car l'IA me générait automatiquement le contenu après en avoir rentré quelques uns
-            # On peut faire une boucle plus tard si on veut optimiser le code
-            but_a, but_b, but_c, but_d, but_e = st.columns(5)
-            with but_a:
-                st.checkbox(f"{genres[1]}", key="genre_1")
-                st.checkbox(f"{genres[6]}", key="genre_6")
-                st.checkbox(f"{genres[11]}", key="genre_11")
-                st.checkbox(f"{genres[16]}", key="genre_16")
-            with but_b:
-                st.checkbox(f"{genres[2]}", key="genre_2")
-                st.checkbox(f"{genres[7]}", key="genre_7")
-                st.checkbox(f"{genres[12]}", key="genre_12")
-                st.checkbox(f"{genres[17]}", key="genre_17")
-            with but_c:
-                st.checkbox(f"{genres[3]}", key="genre_3")
-                st.checkbox(f"{genres[8]}", key="genre_8")
-                st.checkbox(f"{genres[13]}", key="genre_13")
-                st.checkbox(f"{genres[18]}", key="genre_18")
-            with but_d:
-                st.checkbox(f"{genres[4]}", key="genre_4")
-                st.checkbox(f"{genres[9]}", key="genre_9")
-                st.checkbox(f"{genres[14]}", key="genre_14")
-                st.checkbox(f"{genres[19]}", key="genre_19")
-            with but_e:
-                st.checkbox(f"{genres[5]}", key="genre_5")
-                st.checkbox(f"{genres[10]}", key="genre_10")
-                st.checkbox(f"{genres[15]}", key="genre_15")
-            filter_col1, filter_col2 = st.columns(2)
+            but_0, but_a, but_b, but_c, but_d, but_e = st.columns([2.5,5,5,5,5,5])
+            # On fait une liste des colonnes pour itérer dessus en ommettant la première colonne qui nous sert uniquement pour la pagination (but_0)
+            colonnes_genres = [but_a, but_b, but_c, but_d, but_e]
+            # On itère sur les genres à partir du deuxième (le premier est "Tout")
+            for i, genre_film in enumerate(genres[1:]):
+                # On répartit les genres dans les 5 colonnes de gauche à droite plutôt que de haut en bas
+                with colonnes_genres[i % len(colonnes_genres)]:
+                    st.checkbox(f"{genre_film}", key=f"genre_{i+1}")
+            
+            st.write("<br><br>", unsafe_allow_html=True)
+            # Boutons de filtrage et réinitialisation
+            filter_col1, fil2, fil3, fil4, fil5, filter_col2 = st.columns(6)
             with filter_col1: # Bouton de filtrage
-                if st.button("Filtrer"):
+                if st.button("Filtrer", width='stretch'):
                     # On créé un DF temporaire pour appliquer les filtres
                     temp_bdd_filtre = bdd.copy()
 
@@ -395,46 +391,78 @@ def page1():
                     st.rerun() # On recharge la page pour afficher les résultats filtrés
             # Bouton de réinitialisation des filtres
             with filter_col2:
-                if st.button("Réinitialiser les filtres"):
+                if st.button("Réinitialiser les filtres", width='stretch'):
                     st.session_state.reset_triggered = True
                     st.rerun() # On recharge la page pour appliquer le reset
 
         st.subheader("Résultats de la recherche")
 
         # On fait la pagination des résultats avec 20 films par page et 5 par ligne
-        films_par_page = 20
+        films_par_page = 30
         total_films = len(st.session_state.filtered_data)
         total_pages = total_films // films_par_page
         if total_films % films_par_page != 0:
             total_pages += 1 # On ajoute une page supplémentaire pour les restants
+        # Boutons de navigation (prcédente sur col1/suivante sur col3) --> Je l'ai déplacé ici car casse sinon
+        def boutons_navigation(key_numb): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons afin d'avoir un key id différent
+            if total_films > 0 :
+                col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 = st.columns([4,1,3,1,1,1,1,1,3,1,4])
+                with col2: # On va à la première page
+                    if st.button("**<<**", key=f"back0_{key_numb}", disabled=(st.session_state.page_number == 0), width='stretch'):
+                        st.session_state.page_number = 0 # On revient à la première page
+                        st.rerun() # On recharge la page pour mettre à jour le contenu
+                with col3: # On revient à la page précédente
+                    if st.button("Page Précédente", key=f"prev_{key_numb}", disabled=(st.session_state.page_number == 0), width='stretch'): # Désactivé si on est à la première page
+                        st.session_state.page_number -= 1 
+                        st.rerun() 
+                with col4: # On revient de deux pages
+                    if st.session_state.page_number >= 2:
+                        if st.button(f"{st.session_state.page_number-1}", key=f"twoback_{key_numb}", disabled=(st.session_state.page_number < 2), width='stretch'):
+                            st.session_state.page_number -= 2 
+                            st.rerun()
+                with col5: # On revient d'une page
+                    if st.session_state.page_number >= 1:
+                        if st.button(f"{st.session_state.page_number}", key=f"oneback_{key_numb}", disabled=(st.session_state.page_number < 1), width='stretch'):
+                            st.session_state.page_number -= 1
+                            st.rerun()
+                with col6: # Page actuelle (toujours désactivé)
+                    st.button(f"**{st.session_state.page_number + 1}**", key=f"page_actuelle_{key_numb}", disabled=True, width='stretch') # Page actuelle en gras
+                with col7: # On avance d'une page
+                    if st.session_state.page_number + 1 < total_pages:
+                        if st.button(f"{st.session_state.page_number+2}", key=f"oneforward_{key_numb}", disabled=(st.session_state.page_number + 1 >= total_pages), width='stretch'):
+                            st.session_state.page_number += 1 
+                            st.rerun()
+                with col8: # On avance de deux pages
+                    if st.session_state.page_number + 2 < total_pages:
+                        if st.button(f"{st.session_state.page_number+3}", key=f"twoforward_{key_numb}", disabled=(st.session_state.page_number + 2 >= total_pages), width='stretch'):
+                            st.session_state.page_number += 2
+                            st.rerun()
+                with col9: # On va à la page suivante
+                    if st.button(f"Page Suivante",key=f"next_{key_numb}", disabled=(st.session_state.page_number >= total_pages - 1), width='stretch'): # Désactivé si on est à la dernière page
+                        st.session_state.page_number += 1
+                        st.rerun() 
+                with col10: # On va à la dernière page
+                    if st.button("**>>**", key=f"forwardend_{key_numb}", disabled=(st.session_state.page_number == -1 or total_pages==1), width='stretch'):
+                        st.session_state.page_number = total_pages - 1
+                        st.rerun()
+                        
         if total_films == 0: # Si aucun film ne correspond aux critères
             st.write("Aucun film ne correspond à vos critères de recherche.")
         else:
             start_idx = st.session_state.page_number * films_par_page # calcul des indices de début de la page courante (0*20, 1*20, etc)
             end_idx = min((st.session_state.page_number + 1) * films_par_page, total_films) # pour ne pas dépasser le total
             display_films = st.session_state.filtered_data.iloc[start_idx:end_idx] # Films à afficher sur la page courante
-
             st.write(f"Nombre de résultats : {total_films}")
 
             # On affiche le numéro de la page actuelle et le total des pages si résultat > 0
             if total_pages > 0:
                 st.write(f"Page {st.session_state.page_number + 1} sur {total_pages}")
 
-            # Boutons de navigation (prcédente sur col1/suivante sur col3)
-            def boutons_navigation(key): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons
-                col1, col2, col3 = st.columns([1, 8, 1])
-                with col1:
-                    if st.button("Page Précédente", key=key, disabled=(st.session_state.page_number == 0)): # Désactivé si on est à la première page
-                        st.session_state.page_number -= 1
-                        st.rerun() # On recharge la page pour mettre à jour le contenu
-                with col3: # J'ai pas voulu me faire chier pour la génération de la deuxième clef
-                    if st.button("Page Suivante",key=key*100, disabled=(st.session_state.page_number >= total_pages - 1)): # Désactivé si on est à la dernière page
-                        st.session_state.page_number += 1
-                        st.rerun() # On recharge la page pour mettre à jour le contenu
             boutons_navigation(1)
             
             # Pagination des films (5 par ligne)
-            films_par_ligne = 5
+            films_par_ligne = 6
+            
             for i in range(0, len(display_films), films_par_ligne):
                 ligne_films = display_films.iloc[i : i + films_par_ligne]
                 cols = st.columns(films_par_ligne)
@@ -444,13 +472,15 @@ def page1():
                         poster_url = film['poster_url']
                         # On affiche un placeholder si l'URL est invalide
                         if pd.isna(poster_url) or poster_url == "Inconnu" :
-                            st.image("http://via.placeholder.com/150", width=150)
+                            st.image(placeholder, width='stretch')
                         else:  # On affiche l'affiche du film
-                            poster = st.image(poster_url, width=150)
-                        st.markdown(f"**{film['titre']}**") # Titre en gras
+                            poster = st.image(poster_sizing(poster_url), width='stretch')
+
+                        film_title = f"""<div class='film-title'><span>{film['titre']}</span></div>"""
+                        st.html(film_title) # Titre en gras
                         
                         # Ajout d'un bouton "Infos" pour chaque film
-                        if st.button("DETAILS", key=f"film_{idx}", width=150):
+                        if st.button("DETAILS", key=f"film_{idx}", width='stretch'):
                             st.session_state.selected_film = film['titre']
                             st.rerun()
         
@@ -475,46 +505,42 @@ pages = [
         st.Page(page3, icon="🤡", title="A&E tracker by WCS"),
     ]
     # Setup de la navigation
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 current_page = st.navigation(pages=pages, position="hidden")
 
     # Setup du menu
 def menu ():
     Menu_font = """<div class='Menu_test'><span>Menu</span></div>"""
-    with st.container(height=90):
+    with st.container(key="mymenu", height=38):
         num_cols_menu = max(len(pages) + 1, 5)
         columns_menu = st.columns(num_cols_menu, vertical_alignment="bottom")
         columns_menu[0].html(Menu_font)
         for col, page in zip(columns_menu[1:-1], pages):
             col.page_link(page, icon=page.icon, width="stretch")
-            
+
 # On lance le menu puis la page
 menu()
 current_page.run()
 # footer fixe en bas de page
 
+def footer():
+    st.write("<br><br><br><br>", unsafe_allow_html=True)  # espace pour le footer
+    st.write("---", unsafe_allow_html=True)  # ligne de séparation
+    with st.container():
+        footer_col1, footer_col2, footer_col3, footer_col4, footer_col5 = st.columns([1, 1, 3, 1, 1])
+        with footer_col1:
+            if logo_cine_en_delire.exists():
+                st.image(logo_cine_en_delire, width=220)
+            else:
+                st.markdown("<p style='text-align: right; margin: 0; font-size: 20px; color: #c62828; font-weight: bold;'>WCS</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="app-footer">', unsafe_allow_html=True)
+        with footer_col3:
+            st.markdown("<p style='text-align: center; margin: 0; font-size: 17px; color: #555;'><br><br>Application créée par la  Wild Comedy Show  pour Le ciné en délire. Données issus de IMDB, TMDB et AFCAE.<br><br>L'abus de film d'A&E provoque des poussées d'intelligence et un gonflement des chevilles. A consommer avec modération.<br><br>Pour toute question épineuse, veuillez contacter madame Claire Mercier du Ciné en Délire.</p>", unsafe_allow_html=True)
 
-footer_col1, footer_col2, footer_col3, footer_col4, footer_col5 = st.columns([1, 1, 3, 1, 1])
+        with footer_col5:
+            if logo_WCS.exists():
+                st.image(logo_WCS, width=220)
+            else:
+                st.markdown("<p style='text-align: right; margin: 0; font-size: 20px; color: #c62828; font-weight: bold;'>WCS</p>", unsafe_allow_html=True)
 
-with footer_col1:
-    if logo_cine_en_delire.exists():
-        st.image(logo_cine_en_delire, width=220)
-    else:
-        st.markdown("<p style='text-align: right; margin: 0; font-size: 20px; color: #c62828; font-weight: bold;'>WCS</p>", unsafe_allow_html=True)
-
-with footer_col2:
-    st.write("")
-
-with footer_col3:
-    st.markdown("<p style='text-align: center; margin: 0; font-size: 17px; color: #555;'>Application créée par la  Wild Comedy Show  pour Le ciné en délire. Données issus de IMDB, TMDB et AFCAE.<br><br>L'abus de film d'A&E provoque des poussées d'intelligence et un gonflement des chevilles. A consommer avec modération.</p>", unsafe_allow_html=True)
-
-with footer_col4:
-    st.write("")
-with footer_col5:
-    if logo_WCS.exists():
-        st.image(logo_WCS, width=220)
-    else:
-        st.markdown("<p style='text-align: right; margin: 0; font-size: 20px; color: #c62828; font-weight: bold;'>WCS</p>", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+footer()
