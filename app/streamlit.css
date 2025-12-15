@@ -36,6 +36,13 @@ body {
   line-height: 2rem;
 }
 
+/* Style du H1 main page */
+.h1 {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
 /* Styles du menu en haut de la page en 3 étapes pour chaque niveau*/
 .st-key-mymenu{
   border-style: groove;
