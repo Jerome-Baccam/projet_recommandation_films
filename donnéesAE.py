@@ -122,7 +122,7 @@ BASE_IMG = "https://image.tmdb.org/t/p/w500"
 
 def get_movie_poster(title):
     """Retourne l'ID du film + le poster_path + l'URL complète."""
-    # Utiliser api_key au lieu de API_KEY
+    # ✅ CORRECTION 2: Utiliser api_key au lieu de API_KEY
     url = (
         f"https://api.themoviedb.org/3/search/movie"
         f"?api_key={api_key}&query={title}&language=fr"

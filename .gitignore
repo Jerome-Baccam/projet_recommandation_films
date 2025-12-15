@@ -6,4 +6,4 @@ __pycache__/
 
 *.xlsx
 *.xls
-*.gz
+*.gzvenv/

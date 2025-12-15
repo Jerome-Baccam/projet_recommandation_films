@@ -1,0 +1,62 @@
+/* Style global */
+body {
+  line-height: 1.2rem;
+}
+
+/* Container des filtres */
+.main-box{
+  border: 20px solid rgba(0,0,0,0.12);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: transparent; 
+  box-shadow: none; 
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.main-title{
+  text-align: center;
+  font-weight:bold;
+  margin: 0.25rem 0 0.75rem 0;
+}
+
+/* Css des synopsis de films sur la page d'un film */
+.synopsis{
+  font-size:1.2rem;
+  line-height: 1.5rem;
+  text-align: justify;
+}
+
+/* Css des titres de films main page + ML */
+.film-title{
+  height: 4rem;
+  text-align:center;
+  overflow : hidden;
+  font-size:1.5rem;
+  line-height: 2rem;
+}
+
+/* Styles du menu en haut de la page en 3 étapes pour chaque niveau*/
+.st-key-mymenu{
+  border-style: groove;
+  border-width: 0.1rem;
+  border-color: silver;
+  margin-top: -3.25rem;
+}
+
+.Menu_test{
+  text-align: left;
+  font-size: 2rem;
+  font-weight:bold;
+  margin-top: -2rem;
+}
+
+a[data-testid="stPageLink-NavLink"] {
+    white-space: nowrap ;
+    overflow: hidden ;
+    text-align: left;
+    align-self: center;
+    text-overflow: ellipsis;
+    min-width: 0 ;
+    display: inline-block;
+}

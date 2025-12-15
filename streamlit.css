@@ -1,0 +1,20 @@
+body {
+  line-height: 1.2rem;
+}
+
+/* Main boxed container for the page title and filters */
+.main-box{
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: transparent; /* make background transparent so it's a framed box */
+  box-shadow: none; /* remove shadow to avoid white bar effect */
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.main-title{
+  text-align: center;
+  margin: 0.25rem 0 0.75rem 0;
+  color: #c62828;
+}
