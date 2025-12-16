@@ -24,8 +24,14 @@ else:
 logo_WCS = Path(__file__).parent / "wcs.jpg"
 logo_cine_en_delire = Path(__file__).parent / "cine_en_delire.png"
 placeholder = Path(__file__).parent / "placeholder_wcs.png"
+banner = Path(__file__).parent / "image.png"
 # On intègre  le fichier csv et on définit la liste des genres
-film_csv = pd.read_csv("films_final_2.csv")
+
+@st.cache_data
+def load_data():
+    data_path = Path(__file__).parent / "films_final_2.csv"
+    return pd.read_csv(data_path)
+film_csv = load_data()
 bdd = pd.DataFrame(film_csv)
 
 # Conversion des colonnes de listes pour le système de recommandation
@@ -60,6 +66,7 @@ for directors_str in film_csv['directeurs'].dropna():
 realisateur_list = ['Tout'] + sorted(list(all_unique_directors))
 
 #resizing des affiches de films pour qu'ils aient tous la même taille
+@st.cache_data
 def poster_sizing(poster_link):
     r = requests.get(poster_link)
     poster_resized = Image.open(BytesIO(r.content))
@@ -168,8 +175,6 @@ if 'selected_film' not in st.session_state:
 
 
 # FONCTION POUR AFFICHER UN FILM EN DÉTAIL + RECOMMANDATIONS 
-
-
 def display_film_detail(film_data):
     """Affiche les détails d'un film avec ses recommandations"""
     
@@ -309,14 +314,16 @@ def page1():
         st.session_state.reset_triggered = False 
         st.rerun() 
 
+                # CONTENU DE LA PAGE PRINCIPALE
+    # Bannière en haut
+    with st.container(vertical_alignment="center", height="stretch", border=False):
+        st.image(banner, width='stretch')  
+
     # Je créé trois colonnes pour centrer le contenu
     lay_gauche, lay_centre, lay_droit = st.columns([1, 20, 1])
     # titre
     with lay_centre:
-        # box stylisée pour le titre et les filtres
-        st.markdown('<div class="main-box">', unsafe_allow_html=True)
         st.markdown("<h1 class='main-title'>Recherche de films d'Art & Essai</h1>", unsafe_allow_html=True)
-
         # Filtres container (dans la box stylisée)
         with st.container(border=True):
             st.subheader("Filtres")
@@ -348,8 +355,9 @@ def page1():
                 # On répartit les genres dans les 5 colonnes de gauche à droite plutôt que de haut en bas
                 with colonnes_genres[i % len(colonnes_genres)]:
                     st.checkbox(f"{genre_film}", key=f"genre_{i+1}")
-            
+
             st.write("<br><br>", unsafe_allow_html=True)
+            
             # Boutons de filtrage et réinitialisation
             filter_col1, fil2, fil3, fil4, fil5, filter_col2 = st.columns(6)
             with filter_col1: # Bouton de filtrage
@@ -403,8 +411,9 @@ def page1():
         total_pages = total_films // films_par_page
         if total_films % films_par_page != 0:
             total_pages += 1 # On ajoute une page supplémentaire pour les restants
-        # Boutons de navigation (prcédente sur col1/suivante sur col3) --> Je l'ai déplacé ici car casse sinon
-        def boutons_navigation(key_numb): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons afin d'avoir un key id différent
+        # Boutons de navigation (prcédente sur col1/suivante sur col3) --> Je l'ai déplacé ici car casse l'UX sinon
+        
+        def boutons_navigation(key_numb): # Attention il faudra à chaque fois rentrer un nouveau numéro pour recréer les boutons
             if total_films > 0 :
                 col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 = st.columns([4,1,3,1,1,1,1,1,3,1,4])
                 with col2: # On va à la première page
@@ -425,7 +434,7 @@ def page1():
                         if st.button(f"{st.session_state.page_number}", key=f"oneback_{key_numb}", disabled=(st.session_state.page_number < 1), width='stretch'):
                             st.session_state.page_number -= 1
                             st.rerun()
-                with col6: # Page actuelle (toujours désactivé)
+                with col6: # Page actuelle
                     st.button(f"**{st.session_state.page_number + 1}**", key=f"page_actuelle_{key_numb}", disabled=True, width='stretch') # Page actuelle en gras
                 with col7: # On avance d'une page
                     if st.session_state.page_number + 1 < total_pages:
@@ -496,8 +505,87 @@ def page2():
     st.image(logo_cine_en_delire, width=600)
 
 def page3():
-    st.title("A&E Tracker par la Wild Comedy Show")
-    st.image(logo_WCS, width=600)
+    """Page A&E Tracker avec présentation du projet"""
+    
+    # CSS pour le thème noir /!\ Semble broken (Thomas) /!\
+    st.markdown("""
+        <style>
+        .page3-title {
+            color: #ffffff;
+            text-align: center;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<h1 class='page3-title'>A&E Tracker par la Wild Comedy Show</h1>", unsafe_allow_html=True)
+    st.write("")
+    st.write("")    
+    # Encadré principal - Introduction (NOIR)
+    with st.container(border=True, horizontal=True, vertical_alignment="center"):
+        st.markdown("<h3 style='text-align: center;'>Pourquoi ce tracker</h3>", unsafe_allow_html=True)
+        st.markdown("""
+            <p style='text-align: center; line-height: 1.7; font-size: 16px;'>
+                L'A&E Tracker répond à un besoin identifié par le cinéma d'Art et Essai 
+                "Le Ciné en Délire" : offrir aux spectateurs un outil de recherche et de 
+                recommandation adapté au catalogue spécifique des films d'Art et Essai. 
+                Notre objectif est de faciliter la découverte de films en fonction des 
+                préférences des utilisateurs, tout en valorisant la richesse du cinéma 
+                indépendant et d'auteur.
+            </p>
+            """, unsafe_allow_html=True)
+    
+    st.write("")
+    # Trois colonnes pour le contenu principal
+    with st.container(border=True, horizontal=True, height='stretch', vertical_alignment="center"):
+        col1, col2, col3 = st.columns([2, 1.2, 2])
+        
+        with col1:
+            with st.container(border=True, height='stretch', horizontal=True, vertical_alignment="center"):
+                st.markdown("#### Les fonctionnalités du site")
+                st.markdown("""<p style='text-align: justify; line-height: 1.7;font-size: 16px;'><br>
+                    • Trouvez rapidement vos films préférés grâce à nos filtres avancés<br>
+                    • Naviguez facilement parmi des milliers de films<br>
+                    • Découvrez des films similaires à chacun de vos coups de cœur<br>
+                    • Explorez notre catalogue par genre, acteur ou réalisateur<br>
+                    • Consultez toutes les infos : synopsis, casting, notes<br>                    
+                    • Profitez d'une interface claire et intuitive
+                    </p>""", unsafe_allow_html=True)
+        
+        with col2:
+            # Encadré noir pour le logo
+            with st.container(border=False, height='stretch', horizontal=False, vertical_alignment="center"):
+                if logo_WCS.exists():
+                    st.image(logo_WCS, width='content')
+                else:
+                    st.markdown("<h2 style='text-align: center; color: #ffffff;'>WCS LOGO</h2>", unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+        
+        with col3:
+            with st.container(border=True, height='stretch', horizontal=True, vertical_alignment="center"):
+                st.markdown("#### La WCS en quelques mots")
+                st.markdown("""<p style='text-align: justify;  line-height: 1.7; font-size: 16px;'><br>
+                    La Wild Comedy Show se positionne comme une société de services data, 
+                    capable de transformer des données culturelles en leviers de décision et de découverte, 
+                    avec une touche créative fidèle à l'univers du Ciné en Délire.<br><br>
+                    Elle est composée d'une équipe de consultants expert en data: 
+                    Solange, Jenny, Thomas et Jérôme.</p>
+                    """, unsafe_allow_html=True)
+    
+    st.write("")
+        
+    with st.container(border=True, horizontal=True, width='stretch', vertical_alignment="center"):
+        st.markdown("<h3 style='text-align: center;'> Nous contacter </h3>", unsafe_allow_html=True)
+        st.markdown("""
+            <p style='text-align: justify; line-height: 1.7; horizontal-align: center;font-size: 16px;'>
+                Vous êtes une entreprise et vous souhaitez développer des solutions 
+                data sur-mesure pour vos besoins spécifiques ? <br>
+                Contactez nous par email: 
+                contact@wildcomedyshow.fr ou venez nous rendre visite à notre agence:
+                1 rue de la Princesse Licorne 
+                00000 Royaume Arc-en-Ciel                
+            </p>
+            """, unsafe_allow_html=True)
 
 pages = [
         st.Page(page1, icon="📽️", title="Recherche A&E", default=True),
@@ -509,6 +597,7 @@ st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 current_page = st.navigation(pages=pages, position="hidden")
 
     # Setup du menu
+@st.cache_data
 def menu ():
     Menu_font = """<div class='Menu_test'><span>Menu</span></div>"""
     with st.container(key="mymenu", height=38):
@@ -521,8 +610,9 @@ def menu ():
 # On lance le menu puis la page
 menu()
 current_page.run()
-# footer fixe en bas de page
 
+# footer fixe en bas de page
+@st.cache_data
 def footer():
     st.write("<br><br><br><br>", unsafe_allow_html=True)  # espace pour le footer
     st.write("---", unsafe_allow_html=True)  # ligne de séparation
