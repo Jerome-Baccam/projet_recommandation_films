@@ -74,3 +74,20 @@ a[data-testid="stPageLink-NavLink"] {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
+
+.st-emotion-cache-7hhi3 {
+    padding-top: 0.5rem;
+    height: 4.5rem;
+    background-color: black;
+    position: fixed;
+    width: 100%;
+    z-index: 9999;
+  }
+
+.st-key-back_to_search {
+    position : fixed;
+    height: 2.5rem;
+    padding-top: 2.3rem;
+    background-color: black;
+    opacity: 100%;
+}

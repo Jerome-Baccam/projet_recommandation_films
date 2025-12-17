@@ -185,107 +185,107 @@ if 'selected_film' not in st.session_state:
 # FONCTION POUR AFFICHER UN FILM EN DÉTAIL + RECOMMANDATIONS 
 def display_film_detail(film_data):
     """Affiche les détails d'un film avec ses recommandations"""
+            # Bouton retour
     
-    # Bouton retour
-    if st.button("← Retour à la recherche"):
-        st.session_state.selected_film = None
-        st.rerun()
-    
-    # Affichage du film
-    col1, col2 = st.columns([2, 5])
-    
-    with col1:
-        
-        if pd.notna(film_data['poster_url']) and film_data['poster_url'] != 'Inconnu':
-            try:
-                st.image(poster_sizing(film_data['poster_url']), width='stretch')
-            except:
-                st.image(placeholder, width='stretch')
-                st.info("Affiche non disponible")
-        else:
-            st.image(placeholder, width='stretch')
-            st.info("Affiche non disponible")
-    
-    with col2:
-        st.title(film_data['titre'])
-        
-        # Réalisateurs
-        if isinstance(film_data['directeurs'], list) and len(film_data['directeurs']) > 0:
-            st.markdown(f"**Réalisé par :** {', '.join(film_data['directeurs'])}")
-        
-        # Acteurs
-        if isinstance(film_data['acteurs'], list) and len(film_data['acteurs']) > 0:
-            acteurs_str = ", ".join(film_data['acteurs'][:3])
-            st.markdown(f"**En vedette :** {acteurs_str}")
-        
-        # Genres
-        if isinstance(film_data['genres'], list) and len(film_data['genres']) > 0:
-            st.markdown(f"**Genres :** {' | '.join(film_data['genres'])}")
-        
-        st.markdown("---")
-        
-        # Métriques
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            if pd.notna(film_data['année']):
-                try:
-                    annee_str = str(film_data['année'])
-                    if '-' in annee_str:
-                        annee = annee_str.split('-')[-1]
-                    else:
-                        annee = int(float(annee_str))
-                    st.metric("Année", annee)
-                except:
-                    st.metric("Année", film_data['année'])
-        with col_b:
-            if pd.notna(film_data['votes']):
-                st.metric("Note", f"{film_data['votes']:.1f}/10")
-        with col_c:
-            if pd.notna(film_data['nombre de votes']):
-                st.metric("Votes", f"{int(film_data['nombre de votes']):,}")
-        
-        st.markdown("---")
-        
-        # Synopsis
-        st.markdown("### Synopsis")
-        if pd.notna(film_data['résumé']) and film_data['résumé'] != 'Non disponible':
-            st.write(f"""<div class='synopsis'><span>{film_data['résumé']}</span></div>""", unsafe_allow_html=True)
-        else:
-            st.info("Synopsis non disponible")
-    
-    st.markdown("---")
-    
-    # RECOMMANDATIONS
-    st.markdown("## Si vous avez aimé ce film, vous aimerez probablement :")
-    
-    recommendations = get_recommendations(film_data['titre'], bdd, model_data, 6)
-    
-    if not recommendations.empty:
-        cols = st.columns(6)
-        for idx, (i, row) in enumerate(recommendations.iterrows()):
-            with cols[idx]:
-                # Affiche
-                if pd.notna(row['poster_url']) and row['poster_url'] != 'Inconnu':
+    with st.container(border=False, width='stretch', horizontal_alignment="center", vertical_alignment="center"):
+        with st.container(border=False, width=1980, horizontal_alignment="center", vertical_alignment="center"):
+            # Affichage du film
+            col1, col2 = st.columns([2, 5])
+            
+            with col1:
+                
+                if pd.notna(film_data['poster_url']) and film_data['poster_url'] != 'Inconnu':
                     try:
-                        st.image(poster_sizing(row['poster_url']), width='stretch')
+                        st.image(poster_sizing(film_data['poster_url']), width='stretch')
                     except:
                         st.image(placeholder, width='stretch')
-                        st.info("Affiche")
+                        st.info("Affiche non disponible")
                 else:
                     st.image(placeholder, width='stretch')
-                st.markdown(f"""<div class='film-title'><span>{row['titre']}</span</div>""", unsafe_allow_html=True)
+                    st.info("Affiche non disponible")
+            
+            with col2:
+                st.title(film_data['titre'])
                 
-                # Note
-                if pd.notna(row['votes']):
-                    st.caption(f"{row['votes']:.1f}/10")
+                # Réalisateurs
+                if isinstance(film_data['directeurs'], list) and len(film_data['directeurs']) > 0:
+                    st.markdown(f"**Réalisé par :** {', '.join(film_data['directeurs'])}")
                 
-                # Bouton Infos pour voir ce film recommandé
-                if st.button("Infos", key=f"rec_{idx}", width='stretch'):
-                    st.session_state.selected_film = row['titre']
-                    st.rerun()
-    else:
-        st.warning("Aucune recommandation disponible pour ce film.")
-
+                # Acteurs
+                if isinstance(film_data['acteurs'], list) and len(film_data['acteurs']) > 0:
+                    acteurs_str = ", ".join(film_data['acteurs'][:3])
+                    st.markdown(f"**En vedette :** {acteurs_str}")
+                
+                # Genres
+                if isinstance(film_data['genres'], list) and len(film_data['genres']) > 0:
+                    st.markdown(f"**Genres :** {' | '.join(film_data['genres'])}")
+                
+                st.markdown("---")
+                
+                # Métriques
+                col_a, col_b, col_c = st.columns(3)
+                with col_a:
+                    if pd.notna(film_data['année']):
+                        try:
+                            annee_str = str(film_data['année'])
+                            if '-' in annee_str:
+                                annee = annee_str.split('-')[-1]
+                            else:
+                                annee = int(float(annee_str))
+                            st.metric("Année", annee)
+                        except:
+                            st.metric("Année", film_data['année'])
+                with col_b:
+                    if pd.notna(film_data['votes']):
+                        st.metric("Note", f"{film_data['votes']:.1f}/10")
+                with col_c:
+                    if pd.notna(film_data['nombre de votes']):
+                        st.metric("Votes", f"{int(film_data['nombre de votes']):,}")
+                
+                st.markdown("---")
+                
+                # Synopsis
+                st.markdown("### Synopsis")
+                if pd.notna(film_data['résumé']) and film_data['résumé'] != 'Non disponible':
+                    st.write(f"""<div class='synopsis'><span>{film_data['résumé']}</span></div>""", unsafe_allow_html=True)
+                else:
+                    st.info("Synopsis non disponible")
+            
+            st.markdown("---")
+            
+            # RECOMMANDATIONS
+            st.markdown("## Si vous avez aimé ce film, vous aimerez probablement :")
+            
+            recommendations = get_recommendations(film_data['titre'], bdd, model_data, 6)
+            
+            if not recommendations.empty:
+                cols = st.columns(6)
+                for idx, (i, row) in enumerate(recommendations.iterrows()):
+                    with cols[idx]:
+                        # Affiche
+                        if pd.notna(row['poster_url']) and row['poster_url'] != 'Inconnu':
+                            try:
+                                st.image(poster_sizing(row['poster_url']), width='stretch')
+                            except:
+                                st.image(placeholder, width='stretch')
+                                st.info("Affiche")
+                        else:
+                            st.image(placeholder, width='stretch')
+                        st.markdown(f"""<div class='film-title'><span>{row['titre']}</span</div>""", unsafe_allow_html=True)
+                        
+                        # Note
+                        if pd.notna(row['votes']):
+                            st.caption(f"{row['votes']:.1f}/10")
+                        
+                        # Bouton Infos pour voir ce film recommandé
+                        if st.button("Infos", key=f"rec_{idx}", width='stretch'):
+                            st.session_state.selected_film = row['titre']
+                            st.rerun()
+            else:
+                st.warning("Aucune recommandation disponible pour ce film.")
+    if st.button("← Retour à la recherche", key="back_to_search"):
+        st.session_state.selected_film = None
+        st.rerun()
 
 def page1():
     # VÉRIFIER SI UN FILM EST SÉLECTIONNÉ 
@@ -517,8 +517,10 @@ def page1():
 
 
 def page2():
-    st.title("Le Ciné en Délire")
-    st.image(logo_cine_en_delire, width=600)
+    with st.container(border=False, width='stretch', horizontal_alignment="center", vertical_alignment="center"):
+        with st.container(border=False, width=1980, horizontal_alignment="center", vertical_alignment="center"):
+            st.title("Le Ciné en Délire")
+            st.image(logo_cine_en_delire, width=600)
 
 def page3():
     """Page A&E Tracker avec présentation du projet"""
