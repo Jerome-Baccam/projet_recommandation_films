@@ -92,7 +92,7 @@ a[data-testid="stPageLink-NavLink"] {
     position : fixed;
     height: fit-content;
     width: fit-content;
-    padding-top: 2.4rem;
+    padding-top: 2.75rem;
     background-color: black;
     opacity: 90%;
 }
