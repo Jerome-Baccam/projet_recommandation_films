@@ -714,11 +714,9 @@ def page2():
             st.markdown("""<h1 class='page2-title' style='text-align: center;'>Le Ciné en Délire</h1>""", unsafe_allow_html=True)
             st.write("")
             with st.container(border=True):
-                st.markdown("""<p style='text-align:justify; font-size:20px;'>Laïus sur le ciné :
-                        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
-                        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. 
-                        Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
-                        ratione voluptatem sequi nesciunt."</p>""",unsafe_allow_html=True)
+                st.markdown("""<p style='text-align:justify; font-size:20px;'>Bienvenue au Ciné en Délire :
+                        Le seul cinéma où les films d’auteur côtoient joyeusement les spectateurs qui rient, débattent et parfois philosophent devant la machine à pop‑corn. Ici, chaque séance est une petite aventure : un voyage, une surprise, un choc esthétique (dans le bon sens). On y projette des œuvres qui remuent, qui questionnent, qui font vibrer. Installez‑vous, respirez… et laissez le délire opérer.
+</p>""",unsafe_allow_html=True)
 
             with st.container(height='stretch', vertical_alignment="center"):
                 col1, col2, col3 = st.columns([2,4,2])
@@ -727,12 +725,9 @@ def page2():
                         st.image(logo_cine_en_delire, width="stretch")
                 with col2:
                     with st.container(border=True, vertical_alignment="center", height="stretch"):
-                        st.markdown("""<p style='text-align:center; font-size:30px;'>Laïus sur l'A&E :<br><br></p>""", unsafe_allow_html=True)
-                        st.markdown("""<p style='text-align:justify; font-size:20px;'>Laïus sur le ciné :
-                        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
-                        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. 
-                        Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
-                        ratione voluptatem sequi nesciunt."</p>""",unsafe_allow_html=True)
+                        st.markdown("""<p style='text-align:center; font-size:30px;'>La catégorie Art et Essai :<br><br></p>""", unsafe_allow_html=True)
+                        st.markdown("""<p style='text-align:justify; font-size:20px;'>
+                        C’est un peu le coin VIP du cinéma… sauf que tout le monde est invité, à condition d’aimer les films qui sortent du cadre (parfois très loin du cadre). Ici, on célèbre les œuvres qui préfèrent chuchoter plutôt que hurler, surprendre plutôt qu’exploser, et réfléchir plutôt que courir après un robot géant. On y trouve des réalisateurs qui ont des idées, beaucoup d’idées, parfois trop pour un seul film — mais c’est ce qui fait le charme. Les spectateurs viennent pour être bousculés, émus, intrigués… et repartent souvent en se demandant s’ils ont assisté à un chef‑d’œuvre ou à une énigme artistique. C’est un espace où la créativité règne, où la curiosité est reine, et où même le pop‑corn se sent obligé d’être un peu plus sophistiqué. Ici, le cinéma prend son temps, et vous aussi.</p>""",unsafe_allow_html=True)
                 with col3:
                     with st.container(horizontal_alignment="center", vertical_alignment='center', height="stretch"):
                         loc_tours = pd.DataFrame({"cine" : ["Ciné en délire"], "lat" : [47.383333], "lon" : [0.683333]})
@@ -741,12 +736,9 @@ def page2():
                         st.write("")
             with st.container(height='stretch', vertical_alignment="center", horizontal_alignment="center"):
                 with st.container(border=True):
-                    st.markdown("""<p style='text-align:center; font-size:30px;'>Laïus sur Claire :<br><br></p>""", unsafe_allow_html=True)
+                    st.markdown("""<p style='text-align:center; font-size:30px;'>Directrice du cinéma :<br><br></p>""", unsafe_allow_html=True)
                     st.markdown("""<p style='text-align:justify; font-size:20px;'>
-                        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
-                        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. 
-                        Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
-                        ratione voluptatem sequi nesciunt."</p>""",unsafe_allow_html=True)
+                        Directrice flamboyante du cinéma d’art et d’essai familial de Tours, Claire Mercier incarne à merveille le mélange improbable entre data science et robe de bal. Issue d’une lignée de cinéphiles passionnés, elle a repris les licornes du cinéma transmises de génération en génération. Ancienne analyste de données, elle sait lire les chiffres comme d’autres lisent les critiques de Télérama. Son goût affirmé pour le business l’a menée à flirter avec les sommets… et brièvement avec la prison (accusée à tort, bien sûr — même les licornes le jurent). Aujourd’hui, elle marie l’art et l’algorithme, la poésie et la performance, dans une programmation audacieuse qui fait vibrer Tours. Une directrice qui prouve que l’on peut aimer les films en noir et blanc tout en pensant en code couleur.</p>""",unsafe_allow_html=True)
                 with st.container(border=False, horizontal_alignment="center"):
                     st.image(cliente, width=600)
 
