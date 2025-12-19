@@ -545,6 +545,22 @@ def statistiques():
         return fig
     
     # Graph 2
+        # fonction importée depuis stackoverflow pour rendre les labels qui se chevauchent plus lisibles
+    def fix_labels(mylabels, tooclose=0.1, sepfactor=2):
+        vecs = np.zeros((len(mylabels), len(mylabels), 2))
+        dists = np.zeros((len(mylabels), len(mylabels)))
+        for i in range(0, len(mylabels)-1):
+            for j in range(i+1, len(mylabels)):
+                a = np.array(mylabels[i].get_position())
+                b = np.array(mylabels[j].get_position())
+                dists[i,j] = np.linalg.norm(a-b)
+                vecs[i,j,:] = a-b
+                if dists[i,j] < tooclose:
+                    mylabels[i].set_x(a[0] + sepfactor*vecs[i,j,0])
+                    mylabels[i].set_y(a[1] + sepfactor*vecs[i,j,1])
+                    mylabels[j].set_x(b[0] - sepfactor*vecs[i,j,0])
+                    mylabels[j].set_y(b[1] - sepfactor*vecs[i,j,1])
+    
     def repart_genre():
         tous_les_genres = bdd[['genre_1', 'genre_2', 'genre_3']].melt(value_name='Genre')
         tous_les_genres['Genre'] = tous_les_genres['Genre'].astype(str).str.strip()
@@ -554,14 +570,23 @@ def statistiques():
         top_10_genres = compte_genres[:10]
         autres = compte_genres[10:].sum()
         if autres > 0:
+            top_10_genres = top_10_genres.copy()
             top_10_genres['Autres'] = autres
-        fig = plt.figure(figsize=(12, 6))
-        plt.pie(top_10_genres,
-                labels= top_10_genres.index,
-                autopct='%1.1f%%',
-                startangle=140,
-                colors=plt.cm.Pastel1.colors)
-        plt.title('Répartition des Genres', fontsize=16)
+        # Create pie chart with legend to the right to avoid label overlap
+        fig, ax = plt.subplots(figsize=(12, 6))
+        wedges, labels, autopct = ax.pie(top_10_genres,
+                                        labels=top_10_genres.index,
+                                        autopct='%1.1f%%',
+                                        startangle=140,
+                                        colors=plt.cm.Set3.colors,
+                                        wedgeprops={'edgecolor': 'white'})
+        fix_labels(autopct, sepfactor=3)
+        fix_labels(labels, sepfactor=3)
+        ax.set_title('Répartition des Genres', fontsize=16)
+        ax.axis('equal')  # keep as circle
+        plt.subplots_adjust(right=0.75)
+        # ensure percentages are legible
+
         return fig
 
     # Graph 3
@@ -571,6 +596,7 @@ def statistiques():
         fig = plt.figure(figsize=(10, 6))
         sns.barplot(data=top_10_films, x='nombre de votes', y='titre', palette='viridis')
         plt.title('Top 10 des Films les plus populaires (par Votes)')
+        plt.ticklabel_format(style='scientific')
         plt.xlabel('Nombre de votes')
         plt.ylabel('Titre du film')
         plt.tight_layout()
@@ -700,7 +726,7 @@ def statistiques():
                 elif box == "Relation popularité-notes":
                     st.pyplot(rel_pop_notes(), width="content")
                 elif box == "Matrice de corrélation":
-                    st.pyplot(matrix(), width=700)
+                        st.pyplot(matrix(), width=700)
 
 
 def page2():
