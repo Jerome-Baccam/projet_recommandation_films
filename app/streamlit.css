@@ -43,14 +43,32 @@ body {
   text-align: center;
 }
 
-/* Styles du menu en haut de la page en 3 étapes pour chaque niveau*/
+.st-key-filter_but {
+  background-color: green;
+  border-color: green;
+}
+
+.st-key-reset_but {
+  background-color: red ;
+  opacity: 90%;
+}
+
+/* Sticky header*/
 .st-key-mymenu{
+  position: fixed;
   border-style: groove;
   border-width: 0.1rem;
   border-color: silver;
-  margin-top: -3.25rem;
+  background-color: black;
+  height: 5rem;
+  top: 3.75rem;
+  width: 99%;
+  overflow: hidden;
+  z-index: 999;
+  opacity: 100%;
 }
 
+/* Style du texte "Menu" dans le menu */
 .Menu_test{
   text-align: left;
   font-size: 2rem;
@@ -58,6 +76,7 @@ body {
   margin-top: -2rem;
 }
 
+/* Style des liens du menu pour éviter le débordement du texte */
 a[data-testid="stPageLink-NavLink"] {
     white-space: nowrap ;
     overflow: hidden ;
@@ -66,4 +85,21 @@ a[data-testid="stPageLink-NavLink"] {
     text-overflow: ellipsis;
     min-width: 0 ;
     display: inline-block;
+}
+
+  /* Code css pour le bouton retour à la recherche */
+.st-key-back_to_search {
+    position : fixed;
+    height: fit-content;
+    width: fit-content;
+    padding-top: 2.75rem;
+    background-color: black;
+    opacity: 90%;
+}
+
+/* Code css pour le layout des pages : nous permet de réduire les marges autour des pages */
+.st-emotion-cache-zy6yx3 {
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
