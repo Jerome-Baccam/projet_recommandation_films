@@ -545,7 +545,6 @@ def statistiques():
         return fig
     
     # Graph 2
-
     def repart_genre():
         tous_les_genres = bdd[['genre_1', 'genre_2', 'genre_3']].melt(value_name='Genre')
         tous_les_genres['Genre'] = tous_les_genres['Genre'].astype(str).str.strip()
@@ -557,7 +556,6 @@ def statistiques():
         if autres > 0:
             top_10_genres = top_10_genres.copy()
             top_10_genres['Autres'] = autres
-        # Create pie chart with legend to the right to avoid label overlap
         fig, ax = plt.subplots(figsize=(12, 6))
         plt.figure(figsize=(10, 10))
         plt.pie(top_10_genres,
@@ -567,10 +565,7 @@ def statistiques():
                 colors=plt.cm.Set3.colors)
         ax.legend()
         ax.set_title('Répartition des Genres', fontsize=16)
-        ax.axis('equal')  # keep as circle
-        plt.subplots_adjust(right=0.75)
-        # ensure percentages are legible
-
+        ax.axis('equal')
         return fig
 
     # Graph 3
