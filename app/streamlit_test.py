@@ -789,7 +789,7 @@ def page3():
                             • Consultez toutes les infos : synopsis, casting, notes<br>                    
                             • Profitez d'une interface claire et intuitive<br>
                             • Une base de données enrichie avec des informations issues de IMDB, TMDB et AFCAE
-                            <br><br><br><br>
+                            <br><br>
                             <u>Notes :</u> Certains films peuvent ne pas avoir d'affiche disponible ou de résumé en raison de limitations dans les données sources.
                             Par ailleurs, les recommandations sont basées sur un algorithme KNN utilisant les genres, acteurs et réalisateurs pour suggérer des films similaires.
                             <br>Les films présentés peuvent parfois ne pas correspondre entièrement aux standards d'Art et Essai en raison de la diversité des données collectées.
@@ -846,9 +846,9 @@ current_page = st.navigation(pages=pages, position="hidden")
     # Setup du menu
 @st.cache_data
 def menu ():
-    st.container(key="menu_container", height=38, border=False)
-    Menu_font = """<div class='Menu_test'><span>Menu</span></div>"""
-    with st.container(key="mymenu", height=38, vertical_alignment="center"):
+    st.container(key="menu_container", height='content', border=False)
+    Menu_font = """<div class='Menu_test' style='text-align:center;'><span>Menu</span></div>"""
+    with st.container(key="mymenu", height='content', vertical_alignment="center"):
         num_cols_menu = max(len(pages) + 1, 6)
         columns_menu = st.columns(num_cols_menu, vertical_alignment="bottom")
         columns_menu[0].html(Menu_font)
