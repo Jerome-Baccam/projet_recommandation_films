@@ -886,7 +886,7 @@ def footer():
                             Application créée par la  Wild Comedy Show  pour Le ciné en délire. 
                             Données issus de IMDB, TMDB et AFCAE.<br><br>
                             L'abus de film d'A&E provoque des poussées d'intelligence et un gonflement des chevilles. 
-                            A consommer avec modération.<br><br>
+                            A consommer sans modération.<br><br>
                             Pour toute question épineuse, veuillez contacter madame Claire Mercier du Ciné en Délire.<br></p>"""
                             , unsafe_allow_html=True)
 
