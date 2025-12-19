@@ -559,12 +559,12 @@ def statistiques():
             top_10_genres['Autres'] = autres
         # Create pie chart with legend to the right to avoid label overlap
         fig, ax = plt.subplots(figsize=(12, 6))
-        wedges, text, autopct = ax.pie(top_10_genres,
-                                        labels=top_10_genres.index,
-                                        autopct='%1.1f%%',
-                                        startangle=140,
-                                        colors=plt.cm.Set3.colors,
-                                        wedgeprops={'edgecolor': 'white'})
+        plt.figure(figsize=(10, 10))
+        plt.pie(top_10_genres,
+                labels=top_10_genres.index,
+                autopct='%1.1f%%',
+                startangle=140,
+                colors=plt.cm.Set3.colors)
         ax.legend()
         ax.set_title('Répartition des Genres', fontsize=16)
         ax.axis('equal')  # keep as circle
